@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skraćivač IPv6 adresa</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f0f4f8;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #333;
+    }
+    input, button, textarea {
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      box-sizing: border-box;
+    }
+    input, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+    }
+    button {
+      background: #730fad;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #965be2;
+    }
+    .output-group {
+      display: flex;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    textarea {
+      flex: 1;
+      padding: 0.75rem;
+      resize: none;
+      background: #e9ecef;
+      border: 1px solid #ccc;
+    }
+    .copy-btn {
+      margin-left: 0.5rem;
+      padding: 0.75rem;
+      background: #77ff95;
+      border: none;
+      color: #fff;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .copy-btn:hover {
+      background: #1e7e34;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Skraćivač IPv6 adresa</h1>
+    <input id="ipv6Input" type="text" placeholder="Unesite IPv6 adresu" />
+    <button onclick="shorten()">Skrati</button>
+    <div class="output-group">
+      <textarea id="ipv6Output" rows="2" readonly placeholder="Ovdje će se prikazati rezultat..."></textarea>
+      <button class="copy-btn" onclick="copyResult()">Kopiraj</button>
+    </div>
+  </div>
+
+  <script>
+    function shorten() {
+      const input = document.getElementById('ipv6Input').value.trim();
+      try {
+        const result = compressIPv6(input);
+        document.getElementById('ipv6Output').value = result;
+      } catch (e) {
+        alert('Neispravna IPv6 adresa');
+      }
+    }
+
+    function copyResult() {
+      const output = document.getElementById('ipv6Output');
+      output.select();
+      document.execCommand('copy');
+    }
+
+    function compressIPv6(ip) {
+      ip = ip.toLowerCase();
+      let parts = ip.split('::');
+      if (parts.length > 2) throw new Error('Invalid');
+      let head = parts[0] ? parts[0].split(':') : [];
+      let tail = parts[1] ? parts[1].split(':') : [];
+      const missing = 8 - (head.length + tail.length);
+      if (missing < 0) throw new Error('Invalid');
+      const zeros = Array(missing).fill('0');
+      const full = [...head, ...zeros, ...tail];
+      if (full.length !== 8) throw new Error('Invalid');
+      const stripped = full.map(h => h.replace(/^0+/, '') || '0');
+      let bestStart = -1, bestLen = 0;
+      let curStart = -1, curLen = 0;
+      stripped.forEach((h, i) => {
+        if (h === '0') {
+          if (curStart === -1) curStart = i;
+          curLen++;
+          if (curLen > bestLen) { bestLen = curLen; bestStart = curStart; }
+        } else {
+          curStart = -1; curLen = 0;
+        }
+      });
+      if (bestLen > 1) {
+        stripped.splice(bestStart, bestLen, '');
+        if (bestStart === 0) stripped.unshift('');
+        if (bestStart + bestLen === 8) stripped.push('');
+      }
+      return stripped.join(':');
+    }
+  </script>
+</body>
+</html>
