@@ -1,136 +1,233 @@
 <!DOCTYPE html>
 <html lang="hr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Skraćivač IPv6 adresa</title>
   <style>
+    * { box-sizing: border-box; margin:0; padding:0; }
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #f0f4f8;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      display: flex; flex-direction: column;
+      align-items: center; padding: 2rem;
+      color: #fff;
     }
     .container {
-      background: #fff;
+      background: rgba(255,255,255,0.1);
       padding: 2rem;
       border-radius: 1rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      max-width: 500px;
       width: 100%;
-      max-width: 400px;
       text-align: center;
+      backdrop-filter: blur(10px);
     }
     h1 {
+      font-size: 2.5rem;
       margin-bottom: 1rem;
-      font-size: 1.5rem;
-      color: #333;
+      letter-spacing: 1.5px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
     input, button, textarea {
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      box-sizing: border-box;
-    }
-    input, button {
       width: 100%;
+      font-size: 1rem;
       padding: 0.75rem;
-      margin: 0.5rem 0;
+      border-radius: 0.5rem;
+      border: none;
+      margin-top: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    input {
+      background: rgba(255,255,255,0.85);
+      color: #333;
+    }
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.5);
     }
     button {
-      background: #730fad;
-      color: #fff;
-      border: none;
       cursor: pointer;
-      transition: background 0.2s ease;
     }
-    button:hover {
-      background: #965be2;
+    .btn-purple {
+      background: linear-gradient(135deg, #8e44ad, #9b59b6);
+      color: #fff;
+    }
+    .btn-purple:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .btn-green {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      color: #fff;
+    }
+    .btn-green:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .output-group {
       display: flex;
-      align-items: center;
+      gap: 0.5rem;
       margin-top: 0.5rem;
     }
     textarea {
-      flex: 1;
-      padding: 0.75rem;
+      background: rgba(0,0,0,0.6);
+      color: #2ecc71;
+      font-family: 'Courier New', monospace;
       resize: none;
-      background: #e9ecef;
-      border: 1px solid #ccc;
+      flex: 1;
+      transition: background 0.3s;
     }
     .copy-btn {
-      margin-left: 0.5rem;
-      padding: 0.75rem;
-      background: #77ff95;
-      border: none;
-      color: #fff;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
+      flex-shrink: 0;
+      width: auto;
     }
-    .copy-btn:hover {
-      background: #1e7e34;
+    .error {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .doc-section {
+      margin-top: 2rem;
+      background: rgba(255,255,255,0.2);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      max-width: 700px;
+      width: 100%;
+      color: #f0f0f0;
+    }
+    .doc-section h2, .doc-section h3 {
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+    }
+    pre {
+      background: rgba(0,0,0,0.7);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: #8be9fd;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Skraćivač IPv6 adresa</h1>
-    <input id="ipv6Input" type="text" placeholder="Unesite IPv6 adresu" />
-    <button onclick="shorten()">Skrati</button>
+    <input id="ipv6Input" placeholder="Unesite IPv6 adresu" />
+    <div id="errorMsg" class="error"></div>
+    <button class="btn-purple" onclick="shorten()">Skrati</button>
     <div class="output-group">
-      <textarea id="ipv6Output" rows="2" readonly placeholder="Ovdje će se prikazati rezultat..."></textarea>
-      <button class="copy-btn" onclick="copyResult()">Kopiraj</button>
+      <textarea id="ipv6Output" rows="2" readonly placeholder="Rezultat..."></textarea>
+      <button class="btn-green copy-btn" onclick="copyResult()">Kopiraj</button>
     </div>
+  </div>
+
+  <div class="doc-section">
+    <h2>Što ovaj alat radi?</h2>
+    <p>
+      Ovaj alat automatski skraćuje IPv6 adresu u kraći, standardizirani format. U skladu s IPv6 pravilima:
+    </p>
+    <ul>
+      <li>Brišu se vodeće nule iz svake grupe.</li>
+      <li>Najduži niz uzastopnih grupa "0000" se zamjenjuje s <code>::</code>.</li>
+      <li>Skraćivanje s <code>::</code> se može primijeniti samo jednom po adresi.</li>
+    </ul>
+    <p>📘 Primjer:</p>
+    <pre>
+Ulaz: 2001:0db8:0000:0000:0000:ff00:0042:8329
+Izlaz: 2001:db8::ff00:42:8329
+    </pre>
+    <h3>Kratki pregled funkcije <code>compressIPv6</code></h3>
+    <p>Ova funkcija:
+    <ul>
+      <li>Razdvaja adresu u dva dijela prema <code>::</code> ako postoji.</li>
+      <li>Izračunava koliko "0000" grupa nedostaje da bi adresa imala ukupno 8 grupa.</li>
+      <li>Zamjenjuje najduži niz nula sa praznim stringom (koji postaje <code>::</code> u izlazu).</li>
+      <li>Briše vodeće nule iz svake grupe.</li>
+    </ul>
+    </p>
+    <pre>
+function compressIPv6(ip) {
+  ip = ip.toLowerCase();
+  let parts = ip.split('::');
+  if (parts.length > 2) throw new Error();
+  let head = parts[0] ? parts[0].split(':') : [];
+  let tail = parts[1] ? parts[1].split(':') : [];
+  const missing = 8 - (head.length + tail.length);
+  if (missing < 0) throw new Error();
+  const full = [...head, ...Array(missing).fill('0'), ...tail];
+  if (full.length !== 8) throw new Error();
+  const stripped = full.map(h => h.replace(/^0+/, '') || '0');
+  let bestStart=-1, bestLen=0, curStart=-1, curLen=0;
+  stripped.forEach((h,i)=>{
+    if (h==='0') {
+      if (curStart===-1) curStart=i;
+      curLen++;
+      if (curLen>bestLen) bestLen=curLen, bestStart=curStart;
+    } else { curStart=-1; curLen=0; }
+  });
+  if (bestLen>1) {
+    stripped.splice(bestStart, bestLen, '');
+    if (bestStart===0) stripped.unshift('');
+    if (bestStart+bestLen===8) stripped.push('');
+  }
+  return stripped.join(':');
+}
+    </pre>
   </div>
 
   <script>
     function shorten() {
-      const input = document.getElementById('ipv6Input').value.trim();
+      const inEl = document.getElementById('ipv6Input');
+      const outEl = document.getElementById('ipv6Output');
+      const errEl = document.getElementById('errorMsg');
+      errEl.textContent = '';
+      outEl.value = '';
+
+      const s = inEl.value.trim();
+      if (!/^[0-9A-Fa-f:.]+$/.test(s)) {
+        errEl.textContent = 'Greška: koristi samo heksadecimalne znakove i dvotočke.';
+        return;
+      }
+
       try {
-        const result = compressIPv6(input);
-        document.getElementById('ipv6Output').value = result;
-      } catch (e) {
-        alert('Neispravna IPv6 adresa');
+        const res = compressIPv6(s);
+        outEl.value = res;
+      } catch {
+        errEl.textContent = 'Greška: unesena adresa nije ispravno formatirana.';
       }
     }
 
     function copyResult() {
-      const output = document.getElementById('ipv6Output');
-      output.select();
+      const t = document.getElementById('ipv6Output');
+      t.select();
       document.execCommand('copy');
     }
 
     function compressIPv6(ip) {
       ip = ip.toLowerCase();
       let parts = ip.split('::');
-      if (parts.length > 2) throw new Error('Invalid');
+      if (parts.length > 2) throw new Error();
       let head = parts[0] ? parts[0].split(':') : [];
       let tail = parts[1] ? parts[1].split(':') : [];
       const missing = 8 - (head.length + tail.length);
-      if (missing < 0) throw new Error('Invalid');
-      const zeros = Array(missing).fill('0');
-      const full = [...head, ...zeros, ...tail];
-      if (full.length !== 8) throw new Error('Invalid');
+      if (missing < 0) throw new Error();
+      const full = [...head, ...Array(missing).fill('0'), ...tail];
+      if (full.length !== 8) throw new Error();
       const stripped = full.map(h => h.replace(/^0+/, '') || '0');
-      let bestStart = -1, bestLen = 0;
-      let curStart = -1, curLen = 0;
-      stripped.forEach((h, i) => {
-        if (h === '0') {
-          if (curStart === -1) curStart = i;
+      let bestStart=-1, bestLen=0, curStart=-1, curLen=0;
+      stripped.forEach((h,i)=>{
+        if (h==='0') {
+          if (curStart===-1) curStart=i;
           curLen++;
-          if (curLen > bestLen) { bestLen = curLen; bestStart = curStart; }
-        } else {
-          curStart = -1; curLen = 0;
-        }
+          if (curLen>bestLen) bestLen=curLen, bestStart=curStart;
+        } else { curStart=-1; curLen=0; }
       });
-      if (bestLen > 1) {
+      if (bestLen>1) {
         stripped.splice(bestStart, bestLen, '');
-        if (bestStart === 0) stripped.unshift('');
-        if (bestStart + bestLen === 8) stripped.push('');
+        if (bestStart===0) stripped.unshift('');
+        if (bestStart+bestLen===8) stripped.push('');
       }
       return stripped.join(':');
     }
